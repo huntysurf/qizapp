@@ -21,11 +21,12 @@ export default function HomeScreen() {
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">How to use:</ThemedText>
           <ThemedText>
-            1. Go to the Quiz tab{'\n'}
-            2. Load a JSON file from your device or cloud storage{'\n'}
-            3. Set your preferred timer duration{'\n'}
-            4. Start the quiz and answer questions{'\n'}
-            5. See immediate feedback with color-coded answers
+            1. Go to the Files tab to upload and manage your quiz files{'\n'}
+            2. Create folders to organize your quizzes{'\n'}
+            3. Start a quiz directly from the Files tab, or{'\n'}
+            4. Go to the Quiz tab to load files manually{'\n'}
+            5. Set your preferred timer duration{'\n'}
+            6. Answer questions and see immediate feedback with color-coded answers
           </ThemedText>
         </ThemedView>
 
@@ -54,6 +55,8 @@ export default function HomeScreen() {
         <ThemedView style={styles.section}>
           <ThemedText type="subtitle">Features:</ThemedText>
           <ThemedText>
+            • File management with upload, delete, and folder organization{'\n'}
+            • Start quizzes directly from saved files{'\n'}
             • Random question order each time{'\n'}
             • Adjustable timer between questions{'\n'}
             • Color-coded feedback (green = correct, red = incorrect){'\n'}
