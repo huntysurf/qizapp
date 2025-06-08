@@ -53,15 +53,33 @@ export default function HomeScreen() {
         </ThemedView>
 
         <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Features:</ThemedText>
+          <ThemedText type="subtitle">Generate Random Quiz with AI</ThemedText>
           <ThemedText>
-            • File management with upload, delete, and folder organization{'\n'}
-            • Start quizzes directly from saved files{'\n'}
-            • Random question order each time{'\n'}
-            • Adjustable timer between questions{'\n'}
-            • Color-coded feedback (green = correct, red = incorrect){'\n'}
-            • Load files from device or cloud storage{'\n'}
-            • Responsive button layout
+            Want to create a custom quiz? Copy this prompt and use it with ChatGPT, Claude, or any AI assistant:
+          </ThemedText>
+          <ThemedView style={styles.codeBlock}>
+            <ThemedText style={styles.code}>
+{`"Generate a JSON quiz file with [X] questions about [TOPIC]. 
+Use this exact format:
+
+[
+  {
+    "question": "Your question here?",
+    "answers": [
+      "Correct answer (always first)",
+      "Wrong answer 1",
+      "Wrong answer 2", 
+      "Wrong answer 3"
+    ]
+  }
+]
+
+Make sure the first answer in each answers array is always the correct one. Include interesting and challenging questions."`}
+            </ThemedText>
+          </ThemedView>
+          <ThemedText style={styles.note}>
+            Replace [X] with desired number of questions and [TOPIC] with your subject. 
+            Save the AI's response as a .json file and upload it using the Files tab.
           </ThemedText>
         </ThemedView>
       </ThemedView>
