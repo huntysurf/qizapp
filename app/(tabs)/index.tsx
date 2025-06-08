@@ -1,10 +1,37 @@
 
 import React from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import * as Clipboard from 'expo-clipboard';
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
 export default function HomeScreen() {
+  const aiPrompt = `Generate a JSON quiz file with [X] questions about [TOPIC]. 
+Use this exact format:
+
+[
+  {
+    "question": "Your question here?",
+    "answers": [
+      "Correct answer (always first)",
+      "Wrong answer 1",
+      "Wrong answer 2", 
+      "Wrong answer 3"
+    ]
+  }
+]
+
+Make sure the first answer in each answers array is always the correct one. Include interesting and challenging questions.`;
+
+  const copyPromptToClipboard = async () => {
+    try {
+      await Clipboard.setStringAsync(aiPrompt);
+      Alert.alert('Copied!', 'Prompt copied to clipboard. You can now paste it into ChatGPT or any AI assistant.');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to copy to clipboard.');
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.content}>
@@ -59,24 +86,12 @@ export default function HomeScreen() {
           </ThemedText>
           <ThemedView style={styles.codeBlock}>
             <ThemedText style={styles.code}>
-{`"Generate a JSON quiz file with [X] questions about [TOPIC]. 
-Use this exact format:
-
-[
-  {
-    "question": "Your question here?",
-    "answers": [
-      "Correct answer (always first)",
-      "Wrong answer 1",
-      "Wrong answer 2", 
-      "Wrong answer 3"
-    ]
-  }
-]
-
-Make sure the first answer in each answers array is always the correct one. Include interesting and challenging questions."`}
+              {aiPrompt}
             </ThemedText>
           </ThemedView>
+          <TouchableOpacity style={styles.copyButton} onPress={copyPromptToClipboard}>
+            <ThemedText style={styles.copyButtonText}>📋 Copy Prompt to Clipboard</ThemedText>
+          </TouchableOpacity>
           <ThemedText style={styles.note}>
             Replace [X] with desired number of questions and [TOPIC] with your subject. 
             Save the AI's response as a .json file and upload it using the Files tab.
@@ -116,5 +131,17 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     fontSize: 12,
     opacity: 0.8,
+  },
+  copyButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  copyButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
