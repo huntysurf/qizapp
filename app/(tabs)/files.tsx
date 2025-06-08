@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   StyleSheet, 
@@ -38,9 +37,8 @@ export default function FilesScreen() {
   // Database operations
   const saveToDatabase = async (key: string, data: any) => {
     try {
-      const Database = (await import('replit')).Database;
-      const db = new Database();
-      await db.set(key, JSON.stringify(data));
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      await AsyncStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
       console.error('Database save error:', error);
     }
@@ -48,9 +46,8 @@ export default function FilesScreen() {
 
   const loadFromDatabase = async (key: string) => {
     try {
-      const Database = (await import('replit')).Database;
-      const db = new Database();
-      const data = await db.get(key);
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const data = await AsyncStorage.getItem(key);
       return data ? JSON.parse(data) : null;
     } catch (error) {
       console.error('Database load error:', error);
@@ -60,9 +57,8 @@ export default function FilesScreen() {
 
   const deleteFromDatabase = async (key: string) => {
     try {
-      const Database = (await import('replit')).Database;
-      const db = new Database();
-      await db.delete(key);
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      await AsyncStorage.removeItem(key);
     } catch (error) {
       console.error('Database delete error:', error);
     }
@@ -108,7 +104,7 @@ export default function FilesScreen() {
         const response = await fetch(fileUri);
         const text = await response.text();
         const data = JSON.parse(text);
-        
+
         if (Array.isArray(data) && data.every(item => 
           item.question && Array.isArray(item.answers) && item.answers.length >= 2
         )) {
@@ -173,7 +169,7 @@ export default function FilesScreen() {
   // Delete folder
   const deleteFolder = async (folderId: string) => {
     const folderFiles = files.filter(f => f.folderId === folderId);
-    
+
     if (folderFiles.length > 0) {
       Alert.alert(
         'Folder Not Empty',
@@ -201,24 +197,15 @@ export default function FilesScreen() {
     }
   };
 
-  // Start quiz with file data
-  const startQuizWithFile = (file: QuizFile) => {
-    // This will be handled by passing data to the quiz tab
-    Alert.alert(
-      'Start Quiz',
-      `Start quiz with "${file.name}" (${file.data.length} questions)?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Start', 
-          onPress: () => {
-            // Save selected file to database for quiz tab to pick up
-            saveToDatabase('selected_quiz_file', file);
-            Alert.alert('Quiz Ready', 'Go to the Quiz tab to start!');
-          }
-        }
-      ]
-    );
+  const startQuizFromFile = async (file: QuizFile) => {
+    try {
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      await AsyncStorage.setItem('selected_quiz_file', JSON.stringify(file));
+      Alert.alert('Success', `Quiz "${file.name}" loaded. Go to Quiz tab to start!`);
+    } catch (error) {
+      console.error('Error setting selected file:', error);
+      Alert.alert('Error', 'Failed to load quiz file');
+    }
   };
 
   // Get current files (filtered by folder)

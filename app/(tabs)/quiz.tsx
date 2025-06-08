@@ -64,14 +64,13 @@ export default function QuizScreen() {
   // Check for quiz file from Files tab
   const checkForSelectedFile = useCallback(async () => {
     try {
-      const Database = (await import('replit')).Database;
-      const db = new Database();
-      const selectedFile = await db.get('selected_quiz_file');
+      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const selectedFile = await AsyncStorage.getItem('selected_quiz_file');
       if (selectedFile) {
         const fileData = JSON.parse(selectedFile);
         setQuizData(fileData.data);
         setLoadedFileName(fileData.name);
-        await db.delete('selected_quiz_file'); // Clear after loading
+        await AsyncStorage.removeItem('selected_quiz_file'); // Clear after loading
       }
     } catch (error) {
       console.error('Error checking for selected file:', error);
