@@ -5,9 +5,9 @@ import {
   ScrollView, 
   Alert, 
   TouchableOpacity, 
-  View, 
-  TextInput 
+  View 
 } from 'react-native';
+import Slider from '@react-native-community/slider';
 import * as DocumentPicker from 'expo-document-picker';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
@@ -258,19 +258,24 @@ export default function QuizScreen() {
         </ThemedView>
 
         <ThemedView style={styles.section}>
-          <ThemedText type="subtitle">Timer Duration (seconds)</ThemedText>
-          <TextInput
-            style={styles.input}
-            value={timerDuration.toString()}
-            onChangeText={(text) => {
-              const num = parseInt(text) || 1;
-              setTimerDuration(Math.max(1, Math.min(10, num)));
-            }}
-            keyboardType="numeric"
-            placeholder="3"
+          <ThemedText type="subtitle">Timer Duration: {timerDuration} seconds</ThemedText>
+          <Slider
+            style={styles.slider}
+            minimumValue={2}
+            maximumValue={15}
+            step={1}
+            value={timerDuration}
+            onValueChange={setTimerDuration}
+            minimumTrackTintColor="#FF0000"
+            maximumTrackTintColor="#FFCCCC"
+            thumbTintColor="#FF0000"
           />
+          <ThemedView style={styles.sliderLabels}>
+            <ThemedText style={styles.sliderLabel}>2s</ThemedText>
+            <ThemedText style={styles.sliderLabel}>15s</ThemedText>
+          </ThemedView>
           <ThemedText style={styles.hint}>
-            How long to wait before the next question (1-10 seconds)
+            How long to wait before the next question (2-15 seconds)
           </ThemedText>
         </ThemedView>
 
@@ -382,13 +387,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  input: {
-    borderWidth: 1,
-    borderColor: 'rgba(128, 128, 128, 0.3)',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: 'rgba(128, 128, 128, 0.1)',
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  sliderLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: -10,
+  },
+  sliderLabel: {
+    fontSize: 12,
+    opacity: 0.7,
   },
   hint: {
     fontSize: 12,
