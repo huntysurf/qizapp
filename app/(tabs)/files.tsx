@@ -311,7 +311,7 @@ export default function FilesScreen() {
                 <ThemedView style={styles.fileActions}>
                   <TouchableOpacity 
                     style={styles.startButton}
-                    onPress={() => startQuizWithFile(file)}
+                    onPress={() => startQuizFromFile(file)}
                   >
                     <ThemedText style={styles.buttonText}>Start Quiz</ThemedText>
                   </TouchableOpacity>
