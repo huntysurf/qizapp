@@ -39,7 +39,7 @@ export default function TabLayout() {
           title: 'Quiz',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="questionmark.circle.fill" color={color} />,
         }}
-      /></Tabs.Screen>
+      />
     </Tabs>
   );
 }
