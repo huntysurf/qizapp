@@ -7,6 +7,7 @@ import {
   TouchableOpacity, 
   View 
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import * as DocumentPicker from 'expo-document-picker';
 import { ThemedText } from '@/components/ThemedText';
@@ -144,9 +145,12 @@ export default function QuizScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    checkForSelectedFile();
-  }, [checkForSelectedFile]);
+  // Check for selected file whenever the tab comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      checkForSelectedFile();
+    }, [checkForSelectedFile])
+  );
 
   const startQuiz = useCallback(() => {
     if (quizData.length === 0) {
