@@ -35,43 +35,93 @@ export default function FilesScreen() {
   const [loading, setLoading] = useState(true);
 
   // Database operations
-  const saveToDatabase = async (key: string, data: any) => {
+  const getAsyncStorage = async () => {
     try {
       const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-      await AsyncStorage.setItem(key, JSON.stringify(data));
+      return AsyncStorage;
+    } catch (error) {
+      console.error('Failed to import AsyncStorage:', error);
+      throw error;
+    }
+  };
+
+  const saveToDatabase = async (key: string, data: any) => {
+    try {
+      const AsyncStorage = await getAsyncStorage();
+      const jsonString = JSON.stringify(data);
+      await AsyncStorage.setItem(key, jsonString);
+      console.log(`Successfully saved ${key} with ${jsonString.length} characters`);
     } catch (error) {
       console.error('Database save error:', error);
+      Alert.alert('Storage Error', 'Failed to save data to storage');
     }
   };
 
   const loadFromDatabase = async (key: string) => {
     try {
-      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const AsyncStorage = await getAsyncStorage();
       const data = await AsyncStorage.getItem(key);
-      return data ? JSON.parse(data) : null;
+      console.log(`Loading ${key}:`, data ? `${data.length} characters` : 'null');
+      
+      if (data) {
+        const parsed = JSON.parse(data);
+        console.log(`Parsed ${key}:`, Array.isArray(parsed) ? `array with ${parsed.length} items` : typeof parsed);
+        return parsed;
+      }
+      return null;
     } catch (error) {
       console.error('Database load error:', error);
+      Alert.alert('Storage Error', 'Failed to load data from storage');
       return null;
     }
   };
 
   const deleteFromDatabase = async (key: string) => {
     try {
-      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      const AsyncStorage = await getAsyncStorage();
       await AsyncStorage.removeItem(key);
+      console.log(`Successfully removed ${key}`);
     } catch (error) {
       console.error('Database delete error:', error);
+      Alert.alert('Storage Error', 'Failed to delete data from storage');
     }
   };
 
   // Load data from database
   const loadData = useCallback(async () => {
     setLoading(true);
-    const savedFiles = await loadFromDatabase('quiz_files') || [];
-    const savedFolders = await loadFromDatabase('quiz_folders') || [];
-    setFiles(savedFiles);
-    setFolders(savedFolders);
-    setLoading(false);
+    try {
+      console.log('Loading data from database...');
+      
+      const savedFiles = await loadFromDatabase('quiz_files');
+      const savedFolders = await loadFromDatabase('quiz_folders');
+      
+      // Validate and set files
+      if (Array.isArray(savedFiles)) {
+        console.log(`Loaded ${savedFiles.length} files`);
+        setFiles(savedFiles);
+      } else {
+        console.log('No valid files found, initializing empty array');
+        setFiles([]);
+      }
+      
+      // Validate and set folders
+      if (Array.isArray(savedFolders)) {
+        console.log(`Loaded ${savedFolders.length} folders`);
+        setFolders(savedFolders);
+      } else {
+        console.log('No valid folders found, initializing empty array');
+        setFolders([]);
+      }
+      
+    } catch (error) {
+      console.error('Error during data loading:', error);
+      Alert.alert('Load Error', 'Failed to load quiz files and folders');
+      setFiles([]);
+      setFolders([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -199,7 +249,16 @@ export default function FilesScreen() {
 
   const startQuizFromFile = async (file: QuizFile) => {
     try {
-      const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
+      console.log('Starting quiz from file:', file);
+      
+      // Validate file data
+      if (!file.data || !Array.isArray(file.data) || file.data.length === 0) {
+        Alert.alert('Invalid Quiz', 'This quiz file has no valid questions.');
+        return;
+      }
+      
+      const AsyncStorage = await getAsyncStorage();
+      
       // Format the data structure that quiz.tsx expects
       const quizData = {
         id: file.id,
@@ -207,8 +266,10 @@ export default function FilesScreen() {
         data: file.data,
         createdAt: file.createdAt
       };
+      
+      console.log('Setting selected quiz file:', quizData);
       await AsyncStorage.setItem('selected_quiz_file', JSON.stringify(quizData));
-      Alert.alert('Success', `Quiz "${file.name}" loaded. Go to Quiz tab to start!`);
+      Alert.alert('Success', `Quiz "${file.name}" loaded with ${file.data.length} questions. Go to Quiz tab to start!`);
     } catch (error) {
       console.error('Error setting selected file:', error);
       Alert.alert('Error', 'Failed to load quiz file');

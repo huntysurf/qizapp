@@ -64,41 +64,83 @@ export default function QuizScreen() {
   // Check for quiz file from Files tab
   const checkForSelectedFile = useCallback(async () => {
     try {
+      console.log('Checking for selected quiz file...');
       const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
       const selectedFile = await AsyncStorage.getItem('selected_quiz_file');
+      
       if (selectedFile) {
-        const fileData = JSON.parse(selectedFile);
-        console.log('Loaded file data:', fileData); // Debug log
+        console.log('Found selected file data:', selectedFile.substring(0, 200) + '...');
         
-        // Ensure we have valid quiz data
-        if (fileData.data && Array.isArray(fileData.data) && fileData.data.length > 0) {
-          setQuizData(fileData.data);
-          setLoadedFileName(fileData.name || 'Loaded Quiz');
-          
-          // Automatically start the quiz after loading
-          setTimeout(() => {
-            const randomizedQuestions = shuffleArray(fileData.data).map(shuffleAnswers);
-            setQuizState({
-              questions: fileData.data,
-              currentQuestionIndex: 0,
-              selectedAnswer: null,
-              showFeedback: false,
-              score: 0,
-              completed: false,
-              randomizedQuestions
-            });
-            setCountdown(0);
-          }, 100);
-        } else {
-          console.error('Invalid quiz data structure:', fileData);
-          Alert.alert('Error', 'Invalid quiz data format');
+        let fileData;
+        try {
+          fileData = JSON.parse(selectedFile);
+          console.log('Parsed file data:', {
+            id: fileData.id,
+            name: fileData.name,
+            dataLength: fileData.data ? fileData.data.length : 'no data',
+            dataType: Array.isArray(fileData.data) ? 'array' : typeof fileData.data
+          });
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          Alert.alert('Error', 'Corrupted quiz file data');
+          await AsyncStorage.removeItem('selected_quiz_file');
+          return;
         }
         
+        // Validate quiz data structure
+        if (!fileData.data || !Array.isArray(fileData.data) || fileData.data.length === 0) {
+          console.error('Invalid quiz data structure:', fileData);
+          Alert.alert('Error', 'Invalid quiz data format - no questions found');
+          await AsyncStorage.removeItem('selected_quiz_file');
+          return;
+        }
+        
+        // Validate individual questions
+        const validQuestions = fileData.data.filter(q => 
+          q && typeof q === 'object' && 
+          q.question && typeof q.question === 'string' &&
+          q.answers && Array.isArray(q.answers) && q.answers.length >= 2
+        );
+        
+        if (validQuestions.length === 0) {
+          console.error('No valid questions found');
+          Alert.alert('Error', 'No valid questions found in quiz file');
+          await AsyncStorage.removeItem('selected_quiz_file');
+          return;
+        }
+        
+        if (validQuestions.length !== fileData.data.length) {
+          console.warn(`${fileData.data.length - validQuestions.length} invalid questions filtered out`);
+        }
+        
+        // Set quiz data
+        setQuizData(validQuestions);
+        setLoadedFileName(fileData.name || 'Loaded Quiz');
+        
+        console.log(`Successfully loaded quiz with ${validQuestions.length} questions`);
+        
+        // Automatically start the quiz after loading
+        setTimeout(() => {
+          const randomizedQuestions = shuffleArray(validQuestions).map(shuffleAnswers);
+          setQuizState({
+            questions: validQuestions,
+            currentQuestionIndex: 0,
+            selectedAnswer: null,
+            showFeedback: false,
+            score: 0,
+            completed: false,
+            randomizedQuestions
+          });
+          setCountdown(0);
+        }, 100);
+        
         await AsyncStorage.removeItem('selected_quiz_file'); // Clear after loading
+      } else {
+        console.log('No selected quiz file found');
       }
     } catch (error) {
       console.error('Error checking for selected file:', error);
-      Alert.alert('Error', 'Failed to load quiz from Files tab');
+      Alert.alert('Error', 'Failed to load quiz from Files tab: ' + error.message);
     }
   }, []);
 
