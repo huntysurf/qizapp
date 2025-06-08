@@ -200,7 +200,14 @@ export default function FilesScreen() {
   const startQuizFromFile = async (file: QuizFile) => {
     try {
       const AsyncStorage = (await import('@react-native-async-storage/async-storage')).default;
-      await AsyncStorage.setItem('selected_quiz_file', JSON.stringify(file));
+      // Format the data structure that quiz.tsx expects
+      const quizData = {
+        id: file.id,
+        name: file.name,
+        data: file.data,
+        createdAt: file.createdAt
+      };
+      await AsyncStorage.setItem('selected_quiz_file', JSON.stringify(quizData));
       Alert.alert('Success', `Quiz "${file.name}" loaded. Go to Quiz tab to start!`);
     } catch (error) {
       console.error('Error setting selected file:', error);

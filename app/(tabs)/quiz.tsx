@@ -68,12 +68,37 @@ export default function QuizScreen() {
       const selectedFile = await AsyncStorage.getItem('selected_quiz_file');
       if (selectedFile) {
         const fileData = JSON.parse(selectedFile);
-        setQuizData(fileData.data);
-        setLoadedFileName(fileData.name);
+        console.log('Loaded file data:', fileData); // Debug log
+        
+        // Ensure we have valid quiz data
+        if (fileData.data && Array.isArray(fileData.data) && fileData.data.length > 0) {
+          setQuizData(fileData.data);
+          setLoadedFileName(fileData.name || 'Loaded Quiz');
+          
+          // Automatically start the quiz after loading
+          setTimeout(() => {
+            const randomizedQuestions = shuffleArray(fileData.data).map(shuffleAnswers);
+            setQuizState({
+              questions: fileData.data,
+              currentQuestionIndex: 0,
+              selectedAnswer: null,
+              showFeedback: false,
+              score: 0,
+              completed: false,
+              randomizedQuestions
+            });
+            setCountdown(0);
+          }, 100);
+        } else {
+          console.error('Invalid quiz data structure:', fileData);
+          Alert.alert('Error', 'Invalid quiz data format');
+        }
+        
         await AsyncStorage.removeItem('selected_quiz_file'); // Clear after loading
       }
     } catch (error) {
       console.error('Error checking for selected file:', error);
+      Alert.alert('Error', 'Failed to load quiz from Files tab');
     }
   }, []);
 
