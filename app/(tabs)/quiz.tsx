@@ -209,6 +209,12 @@ export default function QuizScreen() {
     });
   };
 
+  const clearQuizFile = () => {
+    setQuizData([]);
+    setLoadedFileName('');
+    Alert.alert('Cleared', 'Quiz file has been cleared. You can now load a new file.');
+  };
+
   if (quizState.completed) {
     return (
       <ThemedView style={styles.container}>
@@ -305,9 +311,14 @@ export default function QuizScreen() {
             </ThemedText>
           </TouchableOpacity>
           {quizData.length > 0 && (
-            <ThemedText style={styles.hint}>
-              Or go to the Files tab to manage and start quizzes from saved files
-            </ThemedText>
+            <ThemedView style={styles.clearSection}>
+              <TouchableOpacity style={[styles.button, styles.clearButton]} onPress={clearQuizFile}>
+                <ThemedText style={styles.buttonText}>Clear Quiz File</ThemedText>
+              </TouchableOpacity>
+              <ThemedText style={styles.hint}>
+                Or go to the Files tab to manage and start quizzes from saved files
+              </ThemedText>
+            </ThemedView>
           )}
         </ThemedView>
 
@@ -474,5 +485,11 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#4CAF50',
+  },
+  clearSection: {
+    gap: 10,
+  },
+  clearButton: {
+    backgroundColor: '#FF9500',
   },
 });
