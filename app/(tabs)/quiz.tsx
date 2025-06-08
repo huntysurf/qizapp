@@ -292,6 +292,8 @@ export default function QuizScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: 50,
+    marginBottom: 30,
   },
   setupContainer: {
     padding: 20,
@@ -307,6 +309,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     gap: 20,
+    marginTop: 50,
+    marginBottom: 30,
   },
   section: {
     gap: 10,
