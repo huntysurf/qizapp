@@ -40,6 +40,7 @@ export default function QuizScreen() {
   });
   const [timerDuration, setTimerDuration] = useState<number>(3);
   const [countdown, setCountdown] = useState<number>(0);
+  const [loadedFileName, setLoadedFileName] = useState<string>('');
 
   const shuffleArray = <T,>(array: T[]): T[] => {
     const shuffled = [...array];
@@ -59,6 +60,27 @@ export default function QuizScreen() {
       correctAnswerIndex: shuffledAnswers.indexOf(correctAnswer)
     } as Question & { correctAnswerIndex: number };
   };
+
+  // Check for quiz file from Files tab
+  const checkForSelectedFile = useCallback(async () => {
+    try {
+      const Database = (await import('replit')).Database;
+      const db = new Database();
+      const selectedFile = await db.get('selected_quiz_file');
+      if (selectedFile) {
+        const fileData = JSON.parse(selectedFile);
+        setQuizData(fileData.data);
+        setLoadedFileName(fileData.name);
+        await db.delete('selected_quiz_file'); // Clear after loading
+      }
+    } catch (error) {
+      console.error('Error checking for selected file:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkForSelectedFile();
+  }, [checkForSelectedFile]);
 
   const startQuiz = useCallback(() => {
     if (quizData.length === 0) {
@@ -140,6 +162,7 @@ export default function QuizScreen() {
           item.question && Array.isArray(item.answers) && item.answers.length >= 2
         )) {
           setQuizData(data);
+          setLoadedFileName(result.assets[0].name || 'Uploaded Quiz');
           Alert.alert('Success', `Loaded ${data.length} questions!`);
         } else {
           Alert.alert('Invalid Format', 'Please check your JSON format.');
@@ -252,9 +275,16 @@ export default function QuizScreen() {
           <ThemedText type="subtitle">Load Quiz File</ThemedText>
           <TouchableOpacity style={styles.button} onPress={loadFile}>
             <ThemedText style={styles.buttonText}>
-              {quizData.length > 0 ? `Loaded: ${quizData.length} questions` : 'Select JSON File'}
+              {quizData.length > 0 
+                ? `Loaded: ${loadedFileName || 'Quiz'} (${quizData.length} questions)` 
+                : 'Select JSON File'}
             </ThemedText>
           </TouchableOpacity>
+          {quizData.length > 0 && (
+            <ThemedText style={styles.hint}>
+              Or go to the Files tab to manage and start quizzes from saved files
+            </ThemedText>
+          )}
         </ThemedView>
 
         <ThemedView style={styles.section}>
