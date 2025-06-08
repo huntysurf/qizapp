@@ -191,13 +191,20 @@ export default function QuizScreen() {
       <ScrollView style={styles.container}>
         <ThemedView style={styles.quizContainer}>
           <ThemedView style={styles.header}>
-            <ThemedText type="subtitle">
-              Question {quizState.currentQuestionIndex + 1} of {quizState.randomizedQuestions.length}
-            </ThemedText>
-            <ThemedText>Score: {quizState.score}</ThemedText>
-            {countdown > 0 && (
-              <ThemedText style={styles.countdown}>Next in: {countdown}s</ThemedText>
-            )}
+            <ThemedView style={styles.headerTop}>
+              <ThemedText type="subtitle">
+                Question {quizState.currentQuestionIndex + 1} of {quizState.randomizedQuestions.length}
+              </ThemedText>
+              <TouchableOpacity style={styles.exitButton} onPress={resetQuiz}>
+                <ThemedText style={styles.exitButtonText}>Exit</ThemedText>
+              </TouchableOpacity>
+            </ThemedView>
+            <ThemedView style={styles.headerBottom}>
+              <ThemedText>Score: {quizState.score}</ThemedText>
+              {countdown > 0 && (
+                <ThemedText style={styles.countdown}>Next in: {countdown}s</ThemedText>
+              )}
+            </ThemedView>
           </ThemedView>
 
           <ThemedText type="title" style={styles.question}>
@@ -300,11 +307,30 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   header: {
+    gap: 10,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerBottom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
     gap: 10,
+  },
+  exitButton: {
+    backgroundColor: '#FF3B30',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  exitButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   question: {
     textAlign: 'center',
